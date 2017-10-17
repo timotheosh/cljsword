@@ -1,0 +1,23 @@
+* cljsword
+
+Using Crosswire's Open Source Bible software library, JSword with Clojure.
+
+** Installation
+
+git clone from https://github.com/timotheosh/cljsword.git
+Build with lein
+#+BEGIN_SRC sh
+cd cljsword/ && lein uberjar
+#+END_SRC
+
+** Usage
+
+FIXME: explanation
+
+    $ java -jar target/cljsword-0.1.0-standalone.jar
+
+** License
+
+Copyright © 2017 Tim Hawes
+
+Distributed under the MIT License.
