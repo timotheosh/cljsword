@@ -62,17 +62,17 @@
   [version reference keycount]
   (if (and version reference)
     (let [book (getBook version)
-          key (if (.equals BookCategory/BIBLE (.getBookCategory book))
-                (let [key (.getKey book reference)]
-                  (let [trimv (.trimVerses key keycount)]
+          vkey (if (.equals BookCategory/BIBLE (.getBookCategory book))
+                (let [vkey (.getKey book reference)]
+                  (let [trimv (.trimVerses vkey keycount)]
                     (if (nil? trimv)
-                      key
+                      vkey
                       trimv)))
                 (do
-                  (def key (.createEmptyKeyList book))
+                  (def vkey (.createEmptyKeyList book))
                   (for [ aKey (subvec (.getKey(reference)) 0 keycount)]
-                    (.addAll key aKey))))]
-      (doto (new BookData book key) (.getSAXEventProvider)))))
+                    (.addAll vkey aKey))))]
+      (doto (new BookData book vkey) (.getSAXEventProvider)))))
 
 (defn readStyledText
   "Obtain styled text (in this case HTML) for a book reference."
