@@ -71,23 +71,24 @@
                 (do
                   (def vkey (.createEmptyKeyList book))
                   (for [ aKey (subvec (.getKey(reference)) 0 keycount)]
-                    (.addAll vkey aKey))))]
-      (doto (new BookData book vkey) (.getSAXEventProvider)))))
+                    (.addAll vkey aKey))))
+          data (new BookData book vkey)]
+      (.getSAXEventProvider data))))
 
 (defn readStyledText
   "Obtain styled text (in this case HTML) for a book reference."
   [version reference keycount]
-  (let [book (getBook version)
+  (let [styler (. ConverterFactory (getConverter))
+        book (getBook version)
         osissep (getOsis version reference keycount)]
     (if osissep
-      (let [styler (. ConverterFactory (getConverter))
-            htmlsep (.convert styler osissep)
+      (let [htmlsep (.convert styler osissep)
             bmd (.getBookMetaData book)
             direction (.isLeftToRight bmd)]
         (.setParameter htmlsep "direction" (if direction "ltr" "rtl"))
-        (.writeToString XMLUtil htmlsep)))))
+        (XMLUtil/writeToString htmlsep)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (getText "NASB" "Pro 15:2"))
+  (readStyledText "NASB" "Pro 15:2" 100))
