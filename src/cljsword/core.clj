@@ -71,22 +71,21 @@
                 (do
                   (def vkey (.createEmptyKeyList book))
                   (for [ aKey (subvec (.getKey(reference)) 0 keycount)]
-                    (.addAll vkey aKey))))
-          data (new BookData book vkey)]
-      (.getSAXEventProvider data))))
+                    (.addAll vkey aKey))))]
+      (doto (new BookData book vkey) (.getSAXEventProvider)))))
 
 (defn readStyledText
   "Obtain styled text (in this case HTML) for a book reference."
   [version reference keycount]
-  (let [styler (. ConverterFactory (getConverter))
-        book (getBook version)
+  (let [book (getBook version)
         osissep (getOsis version reference keycount)]
     (if osissep
-      (let [htmlsep (.convert styler osissep)
+      (let [styler (. ConverterFactory (getConverter))
+            htmlsep (.convert styler osissep)
             bmd (.getBookMetaData book)
             direction (.isLeftToRight bmd)]
         (.setParameter htmlsep "direction" (if direction "ltr" "rtl"))
-        (XMLUtil/writeToString htmlsep)))))
+        (.writeToString XMLUtil htmlsep)))))
 
 (defn readDictionary
   "While Bible and Commentary are very similar, a Dictionary is read in
@@ -165,4 +164,8 @@
 (defn -main
     "I don't do a whole lot ... yet."
   [& args]
+<<<<<<< HEAD
   (println (readStyledText "NASB" "Pro 15:2" 100)))
+=======
+  (getText "NASB" "Pro 15:2"))
+>>>>>>> parent of f2facd5... Acquire bug fixes from jsword upstream. Fix some of my own bugs.

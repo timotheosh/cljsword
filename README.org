@@ -13,9 +13,20 @@ Using Crosswire's Open Source Bible software library, JSword with Clojure.
     cd jsword
     mvn install -DskipTests=true
     #+END_SRC
+
+    If, for whatever reason, the latest JSword ceases to work with this code,
+    you can download my fork of Jsword and switch to the v2.1 branch and install
+    it from there.
+    #+BEGIN_SRC shell
+    https://github.com/timotheosh/jsword.git
+    cd jsword
+    git checkout v2.1
+    mvn install -DskipTests=true
+    #+END_SRC
+
     Then get cljsword
     #+BEGIN_SRC shell
-    git clone from https://github.com/timotheosh/cljsword.git
+    git clone https://github.com/timotheosh/cljsword.git
     cd cljsword
     lein uberjar
     #+END_SRC
