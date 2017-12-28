@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.jdom/jdom "1.1.3"]
+                 [org.jdom/jdom2 "2.0.4"]
                  [org.crosswire/jsword "2.1-SNAPSHOT"]]
   :main ^:skip-aot cljsword.core
   :target-path "target/%s"

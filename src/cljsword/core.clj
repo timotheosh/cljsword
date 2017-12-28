@@ -1,9 +1,13 @@
 (ns cljsword.core
   (import
+   [org.crosswire.common.util
+    NetUtil
+    ResourceUtil]
    [org.crosswire.common.xml
     Converter
     SAXEventProvider
-    XMLUtil]
+    XMLUtil
+    TransformingSAXEventProvider]
    [org.crosswire.jsword.book
     Book
     BookCategory
@@ -52,10 +56,6 @@
             data (BookData. book key)]
         (OSISUtil/getCanonicalText (.getOsisFragment data))))))
 
-      ;;; Key key = book.getKey(reference);
-      ;;; BookData data = new BookData(book, key)
-      ;;; return OSISUtil.getCanonicalText(data.getOsisFragment());
-
 (defn getOsis
   "Obtain a SAX event provider for the OSIS document representation of
   one or more book entries."
@@ -88,7 +88,81 @@
         (.setParameter htmlsep "direction" (if direction "ltr" "rtl"))
         (XMLUtil/writeToString htmlsep)))))
 
+(defn readDictionary
+  "While Bible and Commentary are very similar, a Dictionary is read in
+  a slightly different way."
+  []
+  (let [dicts (.getBooks (Books/installed) (BookFilters/getDictionaries))
+        dict (.get dicts 0)
+        keys (.getGlobalKeyList dict)
+        first-key (.next (.iterator keys))
+        data (new BookData dict first-key)]
+    (println "The first key in the default dictionary is " first-key)
+    (println "And the text against that key is "
+             (OSISUtil/getPlainText (.getOsisFragment data)))))
+
+(defn search
+  "An example of how to search for various bits of data."
+  []
+  (let [bible (.getBook (Books/installed) BIBLE_NAME)
+        key (.find bible "+moses +aaron")]
+    (println "The following verses contain both moses and aaron: "
+             (.getName key))
+    (if [(instance? Passage key)]
+      (let [remaining (.trimVerses key 5)]
+        (println "The first 5 verses containing both moses and aaron: "
+                 (.getName key))
+        (if [(not (nil? remaining))]
+          (println "The rest of the verses are: "
+                   (.getName remaining))
+          (println "There are only 5 verses containing both moses and aaron"))))))
+
+(defn rankedSearch
+  "TODO: Still does not work. Can't call Java enum
+   An example of how to perform a ranked search."
+  []
+  (let [bible (.getBook (Books/installed) BIBLE_NAME)
+        rank true
+        max 20
+        modifier (new DefaultSearchModifier)]
+    (.setRanked modifier rank)
+    (.setMaxResults modifier max)
+    (let [results (.find bible (new DefaultSearchRequest
+                                    "for god so loved the world"
+                                    modifier))
+          total (.getCardinality results)
+          partial total]
+      (when [(or (instance? PassageTally results)
+                 (instance? rank results))]
+        (let [tally results
+              rankCount max]
+          ;; TODO: Call java enum value
+          ;; (.setOrdering tally (PassageTally$Order/TALLY))
+          (when [(and (> rankCount 0)
+                      (< rankCount total))]
+            (doall (.trimRanges tally rankCount RestrictionType/NONE)
+                   (println "Showing the first " rankCount
+                            " of " total " verses.")))))
+      (println results))))
+
+(defn searchAndShow
+  "An example of how to do a search and then get text for each range of
+  verses."
+  []
+  (let [bible (.getBook (Books/installed) BIBLE_NAME)
+        key (.find bible "melchesidec~")
+        path "org/crosswire/jsword/xml/html5.xsl"
+        xslurl (ResourceUtil/getResource path)
+        rangeIter (.rangeIterator key RestrictionType/CHAPTER)]
+     (let [range (.next rangeIter)
+            data (new BookData bible range)
+            osissep (.getSAXEventProvider data)
+            htmlsep (new TransformingSAXEventProvider
+                         (NetUtil/toURI xslurl) osissep)
+            text (XMLUtil/writeToString htmlsep)]
+        (println "The html text of " (.getName range) " is " text))))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+    "I don't do a whole lot ... yet."
   [& args]
-  (readStyledText "NASB" "Pro 15:2" 100))
+  (println (readStyledText "NASB" "Pro 15:2" 100)))

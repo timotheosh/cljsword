@@ -3,19 +3,28 @@
 Using Crosswire's Open Source Bible software library, JSword with Clojure.
 
 ** Installation
-
-git clone from https://github.com/timotheosh/cljsword.git
-Build with lein
-#+BEGIN_SRC sh
-cd cljsword/ && lein uberjar
-#+END_SRC
-
+*** You'll need:
+    1. Java 8
+    2. Maven 3+
+    3. Leiningen 2+
+*** Install Latest Jsword SNAPSHOT with Maven
+    #+BEGIN_SRC shell
+    git clone https://github.com/crosswire/jsword.git
+    cd jsword
+    mvn install -DskipTests=true
+    #+END_SRC
+    Then get cljsword
+    #+BEGIN_SRC shell
+    git clone from https://github.com/timotheosh/cljsword.git
+    cd cljsword
+    lein uberjar
+    #+END_SRC
 ** Usage
-
-FIXME: explanation
-
-    $ java -jar target/cljsword-0.1.0-standalone.jar
-
+   Currently this just runs most of the APIExamples for Jsword originally
+   written for JSword. It is a "proof of concept".
+   #+BEGIN_SRC
+   java -jar target/cljsword-0.1.0-standalone.jar
+   #+END_SRC
 ** License
 
 Copyright © 2017 Tim Hawes
