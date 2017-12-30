@@ -1,5 +1,5 @@
 (ns cljsword.core
-  (import
+  (:import
    [org.crosswire.common.util
     NetUtil
     ResourceUtil]
@@ -60,18 +60,19 @@
   "Obtain a SAX event provider for the OSIS document representation of
   one or more book entries."
   [version reference keycount]
-  (if (and version reference)
+  (when (and version reference)
     (let [book (getBook version)
           vkey (if (.equals BookCategory/BIBLE (.getBookCategory book))
-                (let [vkey (.getKey book reference)]
-                  (let [trimv (.trimVerses vkey keycount)]
-                    (if (nil? trimv)
-                      vkey
-                      trimv)))
-                (do
-                  (def vkey (.createEmptyKeyList book))
-                  (for [ aKey (subvec (.getKey(reference)) 0 keycount)]
-                    (.addAll vkey aKey))))
+                 (let [vkey (.getKey book reference)]
+                   (let [trimv (.trimVerses vkey keycount)]
+                     (if (nil? trimv)
+                       vkey
+                       trimv)))
+                 (let [vkey (.createEmptyKeyList book)]
+                   (for [ aKey (.getKey book reference) ] ;; TODO: some clojure interop corrections are needed here!
+                     (when [(not (nil? aKey))]
+                       (.addAll vkey aKey)))
+                   vkey))
           data (new BookData book vkey)]
       (.getSAXEventProvider data))))
 
