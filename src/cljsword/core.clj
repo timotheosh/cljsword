@@ -1,4 +1,6 @@
 (ns cljsword.core
+  (:require [clojure.java.io :as io]
+            [clojurewerkz.propertied.properties :as props])
   (:import
    [org.crosswire.common.util
     NetUtil
@@ -20,6 +22,8 @@
     BooksEvent
     BooksListener
     OSISUtil]
+   [org.crosswire.jsword.book.sword
+    SwordBookPath]
    [org.crosswire.jsword.book.install
     InstallException
     InstallManager
@@ -35,8 +39,48 @@
     RestrictionType
     VerseRange]
    [org.crosswire.jsword.util
-    ConverterFactory])
+    ConverterFactory]
+   [org.crosswire.jsword.versification.system
+    Versifications])
   (:gen-class))
+
+(defn set-sword-path
+  []
+  (let [sword-path
+        (get
+         (props/load-from (io/resource "cljwebsword.properties"))
+         "sword.home")]
+    (SwordBookPath/setAugmentPath (into-array [(io/file sword-path)]))))
+
+(defn available-books
+  "Returns a list of available Book objects that are in the given categor.
+  'Biblical Texts'  for Bibles
+  'Commentaries' for Commentaries
+  'Dictionaries' for Dictionaries
+  'General Books' for Books"
+  [category]
+  (filter
+   (fn [x]
+     (= category (str (.getBookCategory (.getBookMetaData x)))))
+   (.getBooks (Books/installed))))
+
+(defn get-versification
+  "Returns a String representing the type of versification of a given text.
+  If versification is not specified for the given text, KJV is the default."
+  [text]
+  (let [ins (Versifications/instance)
+        v-type (.getVersification ins text)]
+    (if-not (nil? v-type)
+      (.getName v-type)
+      "KJV")))
+
+(defn get-books
+  "Returns a list of BibleBooks from a given version. The version must be
+  able to be retrieved from JSword's Versification class."
+  [version]
+  (let [ins (Versifications/instance)
+        v-type (.getVersification ins version)]
+    (map #(str %) (iterator-seq (.getBookIterator v-type)))))
 
 (def BIBLE_NAME (str "KJV"))
 
@@ -62,24 +106,18 @@
   [version reference keycount]
   (when (and version reference)
     (let [book (getBook version)
-          vkey (if (.equals BookCategory/BIBLE (.getBookCategory book))
-                 (let [vkey (.getKey book reference)]
-                   (let [trimv (.trimVerses vkey keycount)]
-                     (if (nil? trimv)
-                       vkey
-                       trimv)))
-                 (let [vkey (.createEmptyKeyList book)]
-                   (for [ aKey (.getKey book reference) ] ;; TODO: some clojure interop corrections are needed here!
-                     (when [(not (nil? aKey))]
-                       (.addAll vkey aKey)))
-                   vkey))
+          vkey (let [vkey (.getKey book reference)]
+                 (let [trimv (.trimVerses vkey keycount)]
+                   (if (nil? trimv)
+                     vkey
+                     trimv)))
           data (new BookData book vkey)]
       (.getSAXEventProvider data))))
 
 (defn readStyledText
   "Obtain styled text (in this case HTML) for a book reference."
   [version reference keycount]
-  (let [styler (. ConverterFactory (getConverter))
+  (let [styler (ConverterFactory/getConverter)
         book (getBook version)
         osissep (getOsis version reference keycount)]
     (if osissep
@@ -88,6 +126,11 @@
             direction (.isLeftToRight bmd)]
         (.setParameter htmlsep "direction" (if direction "ltr" "rtl"))
         (XMLUtil/writeToString htmlsep)))))
+
+(defn getHtml
+  "Return the passage in HTML"
+  [version reference]
+  (readStyledText version reference 100))
 
 (defn readDictionary
   "While Bible and Commentary are very similar, a Dictionary is read in
@@ -139,7 +182,7 @@
               rankCount max]
           ;; TODO: Call java enum value
           ;; (.setOrdering tally (PassageTally$Order/TALLY))
-          (when [(and (> rankCount 0)
+          (when [(and (pos? rankCount)
                       (< rankCount total))]
             (doall (.trimRanges tally rankCount RestrictionType/NONE)
                    (println "Showing the first " rankCount
@@ -163,7 +206,3 @@
             text (XMLUtil/writeToString htmlsep)]
         (println "The html text of " (.getName range) " is " text))))
 
-(defn -main
-    "I don't do a whole lot ... yet."
-  [& args]
-  (println (readStyledText "NASB" "Pro 15:2" 100)))

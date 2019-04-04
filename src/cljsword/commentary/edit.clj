@@ -1,4 +1,5 @@
 (ns cljsword.commentary.edit
+  (:require [cljsword.core :as sword])
   (:import
    [java.io File]
    [java.net URI]
@@ -37,7 +38,7 @@
 
 (defn add-commentary
   [commentary reference note]
-  (let [book (cljsword.core/getBook commentary)
+  (let [book (sword/getBook commentary)
         swordBookMetaData (.getBookMetaData book)
         versification (.getProperty swordBookMetaData BookMetaData/KEY_VERSIFICATION)
         v11n (.getVersification (Versifications/instance) versification)
@@ -52,7 +53,7 @@
 
 (defn clear-commentary
   [commentary reference]
-  (let [book (cljsword.core/getBook commentary)
+  (let [book (sword/getBook commentary)
         swordBookMetaData (.getBookMetaData book)
         versification (.getProperty swordBookMetaData BookMetaData/KEY_VERSIFICATION)
         v11n (.getVersification (Versifications/instance) versification)
