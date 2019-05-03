@@ -48,12 +48,12 @@
   []
   (let [sword-path
         (get
-         (props/load-from (io/resource "cljwebsword.properties"))
+         (props/load-from (io/resource "cljsword.properties"))
          "sword.home")]
     (SwordBookPath/setAugmentPath (into-array [(io/file sword-path)]))))
 
 (defn available-books
-  "Returns a list of available Book objects that are in the given categor.
+  "Returns a list of available Book objects that are in the given category.
   'Biblical Texts'  for Bibles
   'Commentaries' for Commentaries
   'Dictionaries' for Dictionaries
@@ -198,11 +198,10 @@
         path "org/crosswire/jsword/xml/html5.xsl"
         xslurl (ResourceUtil/getResource path)
         rangeIter (.rangeIterator key RestrictionType/CHAPTER)]
-     (let [range (.next rangeIter)
-            data (new BookData bible range)
-            osissep (.getSAXEventProvider data)
-            htmlsep (new TransformingSAXEventProvider
-                         (NetUtil/toURI xslurl) osissep)
-            text (XMLUtil/writeToString htmlsep)]
-        (println "The html text of " (.getName range) " is " text))))
-
+    (let [range (.next rangeIter)
+          data (new BookData bible range)
+          osissep (.getSAXEventProvider data)
+          htmlsep (new TransformingSAXEventProvider
+                       (NetUtil/toURI xslurl) osissep)
+          text (XMLUtil/writeToString htmlsep)]
+      (println "The html text of " (.getName range) " is " text))))
