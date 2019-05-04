@@ -1,6 +1,6 @@
 (ns cljsword.core
   (:require [clojure.java.io :as io]
-            [clojurewerkz.propertied.properties :as props])
+            [cljsword.config :as config])
   (:import
    [org.crosswire.common.util
     NetUtil
@@ -45,12 +45,11 @@
   (:gen-class))
 
 (defn set-sword-path
-  []
-  (let [sword-path
-        (get
-         (props/load-from (io/resource "cljsword.properties"))
-         "sword.home")]
-    (SwordBookPath/setAugmentPath (into-array [(io/file sword-path)]))))
+  ([] (set-sword-path :system))
+  ([conf]
+   (if (= conf :system)
+     (SwordBookPath/setAugmentPath (into-array (config/get-system-sword-paths)))
+     (SwordBookPath/setAugmentPath (into-array (config/get-sword-path-from-config conf))))))
 
 (defn available-books
   "Returns a list of available Book objects that are in the given category.
@@ -84,28 +83,28 @@
 
 (def BIBLE_NAME (str "KJV"))
 
-(defn getBook
+(defn get-book
   "Retrieves the specified Bible version by initials (specified in the
   mods.d file)"
   [bookInitials]
   (let [books (Books/installed)]
     (.getBook books bookInitials)))
 
-(defn getText
+(defn get-text
   "Returns a passage from the specified version and reference."
   [version reference]
-  (let [book (getBook version)]
+  (let [book (get-book version)]
     (if book
       (let [key (.getKey book reference)
             data (BookData. book key)]
         (OSISUtil/getCanonicalText (.getOsisFragment data))))))
 
-(defn getOsis
+(defn get-osis
   "Obtain a SAX event provider for the OSIS document representation of
   one or more book entries."
   [version reference keycount]
   (when (and version reference)
-    (let [book (getBook version)
+    (let [book (get-book version)
           vkey (let [vkey (.getKey book reference)]
                  (let [trimv (.trimVerses vkey keycount)]
                    (if (nil? trimv)
@@ -114,12 +113,12 @@
           data (new BookData book vkey)]
       (.getSAXEventProvider data))))
 
-(defn readStyledText
+(defn read-styled-text
   "Obtain styled text (in this case HTML) for a book reference."
   [version reference keycount]
   (let [styler (ConverterFactory/getConverter)
-        book (getBook version)
-        osissep (getOsis version reference keycount)]
+        book (get-book version)
+        osissep (get-osis version reference keycount)]
     (if osissep
       (let [htmlsep (.convert styler osissep)
             bmd (.getBookMetaData book)
@@ -127,12 +126,12 @@
         (.setParameter htmlsep "direction" (if direction "ltr" "rtl"))
         (XMLUtil/writeToString htmlsep)))))
 
-(defn getHtml
+(defn get-html
   "Return the passage in HTML"
   [version reference]
-  (readStyledText version reference 100))
+  (read-styled-text version reference 100))
 
-(defn readDictionary
+(defn read-dictionary
   "While Bible and Commentary are very similar, a Dictionary is read in
   a slightly different way."
   []
@@ -161,7 +160,7 @@
                    (.getName remaining))
           (println "There are only 5 verses containing both moses and aaron"))))))
 
-(defn rankedSearch
+(defn ranked-search
   "TODO: Still does not work. Can't call Java enum
    An example of how to perform a ranked search."
   []
@@ -189,7 +188,7 @@
                             " of " total " verses.")))))
       (println results))))
 
-(defn searchAndShow
+(defn search-and-show
   "An example of how to do a search and then get text for each range of
   verses."
   []

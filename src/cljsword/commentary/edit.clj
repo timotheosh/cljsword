@@ -38,7 +38,7 @@
 
 (defn add-commentary
   [commentary reference note]
-  (let [book (sword/getBook commentary)
+  (let [book (sword/get-book commentary)
         swordBookMetaData (.getBookMetaData book)
         versification (.getProperty swordBookMetaData BookMetaData/KEY_VERSIFICATION)
         v11n (.getVersification (Versifications/instance) versification)
@@ -53,7 +53,7 @@
 
 (defn clear-commentary
   [commentary reference]
-  (let [book (sword/getBook commentary)
+  (let [book (sword/get-book commentary)
         swordBookMetaData (.getBookMetaData book)
         versification (.getProperty swordBookMetaData BookMetaData/KEY_VERSIFICATION)
         v11n (.getVersification (Versifications/instance) versification)
