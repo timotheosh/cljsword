@@ -8,14 +8,6 @@
   [path]
   (.exists (clojure.java.io/as-file path)))
 
-(defn get-sword-path-from-config
-  "Returns a vector of io/file paths for Sword found in this library's config file."
-  ([] (get-sword-path-from-config (io/resource "cljsword.edn")))
-  ([config-file]
-   (mapv
-    (fn [x] (-> x io/resource io/file))
-    (:home (:sword (read-config config-file))))))
-
 (defn get-system-sword-paths
   "Returns a vector of io/file paths for Sword, using the default places."
   []

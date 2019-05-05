@@ -49,7 +49,7 @@
   ([conf]
    (if (= conf :system)
      (SwordBookPath/setAugmentPath (into-array (config/get-system-sword-paths)))
-     (SwordBookPath/setAugmentPath (into-array (config/get-sword-path-from-config conf))))))
+     (SwordBookPath/setAugmentPath (into-array [(io/file conf)])))))
 
 (defn available-books
   "Returns a list of available Book objects that are in the given category.
