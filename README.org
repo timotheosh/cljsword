@@ -1,6 +1,6 @@
 * cljsword
 
-This started out as a proof of concept for interfacing Crosswire's jsword with Clojure. It's become more of a personal peorject now, and as such, is more useful as a Clojure library. Jsword is not yet available in a maven repository, so it will require compiling, and installing that library on your own. But don't be afraid, I've tried to make it super easy with these instructions.
+This started out as a proof of concept for interfacing Crosswire's jsword with Clojure. It's become more of a personal project now, and as such, is more useful as a Clojure library. Jsword is not yet available in a maven repository, so it will require compiling, and installing that library on your own. But don't be afraid, I've tried to make it super easy with these instructions.
 
 ** Installation
 *** You'll need:
@@ -9,7 +9,7 @@ This started out as a proof of concept for interfacing Crosswire's jsword with C
     3. Leiningen 2+
     4. An installation of Sword Bibles/texts/commentaries.
 
-    This library does not (yet) implement any of the JSword API's for downloading and installing Bibles and other texts. That functionality is not very high on my lisp of priorities, as it is totally out of scope for how I am planning on using this library. You can, however, use Java interop to use these API's yourself, and if you think it might be useful to others, feel free to submit a PR for it.
+    This library does not (yet) implement any of the JSword API's for downloading and installing Bibles and other texts. That functionality is not very high on my list of priorities, as it is totally out of scope for how I am planning on using this library. You can, however, use Java interop to use these API's yourself, and if you think it might be useful to others, feel free to submit a PR for it.
 
     Aside from that, you'll need to install a few texts to make this work. On Ubuntu/Debian systems it is as easy as:
     #+BEGIN_SRC shell

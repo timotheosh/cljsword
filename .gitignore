@@ -16,4 +16,5 @@ pom.xml.asc
 \#*
 .\#*
 *.swp
+.idea/
 /resources/sword/
