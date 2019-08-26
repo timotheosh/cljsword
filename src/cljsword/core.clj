@@ -1,7 +1,7 @@
 (ns cljsword.core
   (:require [clojure.java.io :as io]
             [cljsword.config :as config]
-            [ccljsword.install-manager :as install-manager])
+            [cljsword.install-manager :as install-manager])
   (:import
    [org.crosswire.common.util
     NetUtil
