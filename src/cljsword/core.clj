@@ -1,6 +1,7 @@
 (ns cljsword.core
   (:require [clojure.java.io :as io]
-            [cljsword.config :as config])
+            [cljsword.config :as config]
+            [ccljsword.install-manager :as install-manager])
   (:import
    [org.crosswire.common.util
     NetUtil
@@ -24,10 +25,6 @@
     OSISUtil]
    [org.crosswire.jsword.book.sword
     SwordBookPath]
-   [org.crosswire.jsword.book.install
-    InstallException
-    InstallManager
-    Installer]
    [org.crosswire.jsword.index.search
     DefaultSearchModifier
     DefaultSearchRequest]

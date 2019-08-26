@@ -1,7 +1,9 @@
 (ns cljsword.config
   (:require [aero.core :refer [read-config]]
             [clojure-ini.core :refer [read-ini]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io])
+  (:import [org.crosswire.jsword.book.sword
+            SwordBookPath]))
 
 (defn- valid-path?
   "Returns true if given path is file or directory."
