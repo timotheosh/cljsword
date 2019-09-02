@@ -11,7 +11,8 @@
   [path]
   (.exists (clojure.java.io/as-file path)))
 
-(defn get-system-sword-paths
+
+(defn- get-system-sword-paths
   "Returns a vector of io/file paths for Sword, using the default places."
   []
   (filterv
@@ -27,7 +28,15 @@
                 (:Install
                  (read-ini "/etc/sword.conf" :keywordize? true)))))]))
 
-(defn add-module-path
+(defn set-sword-path
+  "Sets the sword path to sword-path. The default is to use the system paths"
+  ([] (set-sword-path :system))
+  ([sword-path]
+   (if (= sword-path :system)
+     (SwordBookPath/setAugmentPath (into-array (get-system-sword-paths)))
+     (SwordBookPath/setAugmentPath (into-array [(io/file sword-path)])))))
+
+(defn add-sword-path
   "Adds a path where sword modules can be found."
   [sword-path]
   (SwordBookPath/setAugmentPath (into-array [(io/file sword-path)])))
@@ -40,5 +49,5 @@
     (when (.canWrite install-dir)
       (when-not (some #(= install-path %)
                       (map #(.toString %) sword-paths))
-        (add-module-path install-path))
+        (add-sword-path install-path))
       (SwordBookPath/setDownloadDir install-dir))))

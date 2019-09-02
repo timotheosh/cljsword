@@ -11,20 +11,21 @@
 (def imanager (new InstallManager))
 
 (defn get-installers
-  "Returns a map of known Crosswire installers."
-  []
-  (.getInstallers imanager))
+  "Returns a list of Crosswire installers from the given InstallManager."
+  ([] (get-installers imanager))
+  ([install-manager]
+   (keys (.getInstallers install-manager))))
 
 (defn get-available-books
   "Returns a list of available books for a given installer."
   [installer-name]
   (let [installer (.getInstaller imanager installer-name)]
     (try (.reloadBookList installer)
-         (.getBooks installer)
+         (into () (.getBooks installer))
          (catch IllegalArgumentException exc
            (throw (AssertionError. "Invalid Installer"))))))
 
-(defn book-data
+(defn- book-data
   "Converts SwordBook meta-data into a map."
   [swordbook]
   (let [data (.getBookMetaData (.getBook swordbook))]
@@ -45,12 +46,30 @@
      :l-to-r? (.isLeftToRight data)
      }))
 
-(defn book-data-site
+(defn- classify
+  "Function for classifying a book."
+  [book]
+  (let [cbook (:category book)]
+    (cond (= cbook "Biblical Texts") :bibles
+          (= cbook "Commentaries") :commentaries
+          (= cbook "Lexicons / Dictionaries") :dictionaries
+          (= cbook "Glossaries") :glossaries
+          (= cbook "Daily Devotional") :devotionals
+          (= cbook "Generic Books") :generic-books
+          (= cbook "Cults / Unorthodox / Questionable Material") :unorthodox
+          :else :un-classified)))
+
+(defn sorted-book-data-site
   "Returns book data from the given site."
   [site]
-  (let [data (map book-data (get-available-books site))]
-    {:Bibles
-     (filterv #(= (:category %) "Biblical Texts") data)}))
+  (let [library (atom {})]
+    (let [data (map book-data (get-available-books site))]
+      (doseq [book data]
+        (let [category (classify book)]
+          (when-not (category @library)
+            (swap! library assoc category []))
+          (swap! library update-in [category] conj book)))
+      @library)))
 
 (defn- get-book
   "Retrieves the book object"
