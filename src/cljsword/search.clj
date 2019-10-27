@@ -1,5 +1,6 @@
 (ns cljsword.search
-  (:require [cljsword.config :as config])
+  (:require [cljsword.config :as config]
+            [cljsword.core :as sword])
   (:import
     [org.crosswire.common.util
      NetUtil
@@ -10,6 +11,8 @@
     [org.crosswire.jsword.book
      BookData
      Books]
+    [org.crosswire.jsword.index
+     IndexManagerFactory]
     [org.crosswire.jsword.index.search
      DefaultSearchModifier
      DefaultSearchRequest]
@@ -17,6 +20,16 @@
      Passage
      PassageTally
      RestrictionType]))
+
+(defn- reindex
+  "Re-indexes installed books."
+  [book-initials]
+  (let [book (sword/get-book book-initials)
+        indexmanager (IndexManagerFactory/getIndexManager)]
+    (cond (not (.isIndexed indexmanager book)) (.scheduleIndexCreation indexmanager book)
+          (.needsReindexing indexmanager book) (do (.deleteIndex indexmanager book)
+                                                   (.scheduleIndexCreation indexmanager book))
+          :else true)))
 
 (defn search
   "An example of how to search for various bits of data."

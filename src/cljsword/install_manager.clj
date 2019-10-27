@@ -1,12 +1,11 @@
 (ns cljsword.install-manager
+  (:require [clojure.string :refer [replace] :as string-replace]
+            [clojure.string :refer [lower-case]])
   (:import
    [org.crosswire.jsword.book
-    BookFilter
-    BookSet]
+    BookFilter]
    [org.crosswire.jsword.book.install
-    InstallException
-    InstallManager
-    Installer]))
+    InstallManager]))
 
 (def imanager (new InstallManager))
 
@@ -43,21 +42,15 @@
      :initials (.getInitials data)
      :book-charset (.getBookCharset data)
      :type (.toString (.getBookType data))
-     :l-to-r? (.isLeftToRight data)
-     }))
+     :l-to-r? (.isLeftToRight data)}))
+     
 
-(defn- classify
-  "Function for classifying a book."
-  [book]
-  (let [cbook (:category book)]
-    (cond (= cbook "Biblical Texts") :bibles
-          (= cbook "Commentaries") :commentaries
-          (= cbook "Lexicons / Dictionaries") :dictionaries
-          (= cbook "Glossaries") :glossaries
-          (= cbook "Daily Devotional") :devotionals
-          (= cbook "Generic Books") :generic-books
-          (= cbook "Cults / Unorthodox / Questionable Material") :unorthodox
-          :else :un-classified)))
+(defn- category->keyword
+  "Converts a category string into a keyword."
+  [category]
+  (keyword
+   (string-replace
+    (lower-case category) #"(\s+\/\s+|\s+)" "-")))
 
 (defn sorted-book-data-site
   "Returns book data from the given site."
@@ -65,7 +58,7 @@
   (let [library (atom {})]
     (let [data (map book-data (get-available-books site))]
       (doseq [book data]
-        (let [category (classify book)]
+        (let [category (category->keyword (:category book))]
           (when-not (category @library)
             (swap! library assoc category []))
           (swap! library update-in [category] conj book)))
