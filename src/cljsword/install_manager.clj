@@ -1,6 +1,5 @@
 (ns cljsword.install-manager
-  (:require [clojure.string :refer [replace] :as string-replace]
-            [clojure.string :refer [lower-case]])
+  (:require [clojure.string :as str])
   (:import
    [org.crosswire.jsword.book
     BookFilter]
@@ -43,14 +42,14 @@
      :book-charset (.getBookCharset data)
      :type (.toString (.getBookType data))
      :l-to-r? (.isLeftToRight data)}))
-     
+
 
 (defn- category->keyword
   "Converts a category string into a keyword."
   [category]
   (keyword
-   (string-replace
-    (lower-case category) #"(\s+\/\s+|\s+)" "-")))
+   (str/replace
+    (str/lower-case category) #"(\s+\/\s+|\s+)" "-")))
 
 (defn sorted-book-data-site
   "Returns book data from the given site."
